@@ -29,8 +29,10 @@ To learn more about Next.js, take a look at the following resources:
 
 You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-## Deploy on Vercel
+## Deployment (GitHub + Railway + Convex)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **Repository:** push `main` to GitHub (this repo).
+- **Railway:** the `web` service runs Next.js. A deploy runs on every push to `main` via [`.github/workflows/deploy-railway.yml`](.github/workflows/deploy-railway.yml).
+- **One-time GitHub secret:** in the repo → *Settings → Secrets and variables → Actions*, add **`RAILWAY_TOKEN`**. Create a project token under your Railway project → *Settings → Tokens* ([docs](https://docs.railway.com/guides/cli#project-token)).
+- **Convex production:** deploy functions with `npx convex deploy -y`. Seed prod data with `NEXT_PUBLIC_CONVEX_URL=<your-prod-url> npx tsx scripts/seed.ts` (see Convex dashboard for the prod deployment URL).
+- **Railway variables:** set `NEXT_PUBLIC_CONVEX_URL`, `NEXT_PUBLIC_MAPBOX_TOKEN`, and `NEXT_PUBLIC_SITE_URL` (your public Railway or custom domain) on the `web` service.
