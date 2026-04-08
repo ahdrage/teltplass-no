@@ -10,8 +10,8 @@ export default defineSchema({
     lat: v.number(),
     lng: v.number(),
     amenities: v.array(v.string()),
-    photos: v.array(v.id("_storage")),
-    photoMain: v.optional(v.id("_storage")),
+    photos: v.array(v.string()),
+    photoMain: v.optional(v.string()),
     approved: v.boolean(),
     oldPath: v.optional(v.string()),
     createdAt: v.number(),
@@ -26,7 +26,7 @@ export default defineSchema({
     slug: v.string(),
     lat: v.number(),
     lng: v.number(),
-    image: v.optional(v.id("_storage")),
+    image: v.optional(v.string()),
     placeCount: v.number(),
   }).index("by_slug", ["slug"]),
 
@@ -42,7 +42,7 @@ export default defineSchema({
     lat: v.number(),
     lng: v.number(),
     amenities: v.array(v.string()),
-    photos: v.array(v.id("_storage")),
+    photos: v.array(v.string()),
     submitterEmail: v.optional(v.string()),
     status: v.union(
       v.literal("pending"),

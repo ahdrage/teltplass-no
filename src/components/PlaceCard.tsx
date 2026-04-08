@@ -1,9 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useQuery } from "convex/react";
-import { api } from "../../convex/_generated/api";
-import { Id } from "../../convex/_generated/dataModel";
 import Link from "next/link";
 import Image from "next/image";
 import { AMENITY_CONFIG } from "../lib/constants";
@@ -13,7 +10,6 @@ interface PlaceCardProps {
   slug: string;
   description: string;
   amenities: string[];
-  photoMain?: Id<"_storage">;
   imageUrl?: string | null;
   distance?: number;
   index?: number;
@@ -26,7 +22,6 @@ export function PlaceCard({
   slug,
   description,
   amenities,
-  photoMain,
   imageUrl,
   distance,
   index = 0,
@@ -41,9 +36,8 @@ export function PlaceCard({
       style={{ animationDelay: `${index * 80}ms` }}
     >
       <div className="aspect-[4/3] relative overflow-hidden bg-[var(--color-sand)]">
-        {photoMain ? (
+        {imageUrl ? (
           <StorageImage
-            storageId={photoMain}
             imageUrl={imageUrl}
             alt={title}
             preload={preload}
@@ -80,33 +74,26 @@ export function PlaceCard({
 }
 
 export function StorageImage({
-  storageId,
   imageUrl,
   alt,
   className = "",
   preload = false,
   sizes,
 }: {
-  storageId: Id<"_storage">;
   imageUrl?: string | null;
   alt: string;
   className?: string;
   preload?: boolean;
   sizes?: string;
 }) {
-  const fallbackUrl = useQuery(
-    api.storage.getUrl,
-    imageUrl ? "skip" : { storageId },
-  );
-  const url = imageUrl ?? fallbackUrl;
   const [failed, setFailed] = useState(false);
-  if (!url) {
+  if (!imageUrl) {
     return <div className={`w-full h-full bg-[var(--color-sand)] animate-pulse ${className}`} />;
   }
   if (failed) return <PlaceholderImage />;
   return (
     <Image
-      src={url}
+      src={imageUrl}
       alt={alt}
       fill
       sizes={sizes}

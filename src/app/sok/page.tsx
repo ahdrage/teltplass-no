@@ -126,7 +126,7 @@ export default function SokPage() {
               slug={place.slug}
               description={place.description}
               amenities={place.amenities}
-              photoMain={place.photoMain ?? place.photos?.[0]}
+              imageUrl={place.photoMain ?? place.photos?.[0] ?? null}
               index={i}
             />
           ))}

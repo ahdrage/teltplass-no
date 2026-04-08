@@ -173,7 +173,7 @@ function SubmissionsTab() {
                     <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
                       {sub.photos.map((photoId, i) => (
                         <div key={photoId} className="aspect-square rounded-lg overflow-hidden border border-[var(--color-stone)]/15">
-                          <StorageImage storageId={photoId} alt={`Bilde ${i + 1}`} className="rounded-lg" />
+                          <StorageImage imageUrl={photoId} alt={`Bilde ${i + 1}`} className="rounded-lg" />
                         </div>
                       ))}
                     </div>
@@ -317,7 +317,7 @@ function PlaceEditPanel({
     lat: number;
     lng: number;
     amenities: string[];
-    photos: Id<"_storage">[];
+    photos: string[];
   };
   onSave: (updates: { title?: string; description?: string; address?: string; amenities?: string[] }) => Promise<void>;
 }) {
@@ -397,7 +397,7 @@ function PlaceEditPanel({
             <div className="grid grid-cols-4 gap-1.5">
               {place.photos.slice(0, 8).map((photoId, i) => (
                 <div key={photoId} className="aspect-square rounded-md overflow-hidden border border-[var(--color-stone)]/15">
-                  <StorageImage storageId={photoId} alt={`Bilde ${i + 1}`} className="rounded-md" />
+                  <StorageImage imageUrl={photoId} alt={`Bilde ${i + 1}`} className="rounded-md" />
                 </div>
               ))}
             </div>

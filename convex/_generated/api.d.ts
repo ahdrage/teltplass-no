@@ -9,6 +9,7 @@
  */
 
 import type * as cities from "../cities.js";
+import type * as imageMigration from "../imageMigration.js";
 import type * as newsletter from "../newsletter.js";
 import type * as places from "../places.js";
 import type * as seed from "../seed.js";
@@ -23,6 +24,7 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   cities: typeof cities;
+  imageMigration: typeof imageMigration;
   newsletter: typeof newsletter;
   places: typeof places;
   seed: typeof seed;

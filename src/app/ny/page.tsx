@@ -6,7 +6,6 @@ import { api } from "../../../convex/_generated/api";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { MAPBOX_TOKEN, AMENITY_CONFIG } from "../../lib/constants";
-import { Id } from "../../../convex/_generated/dataModel";
 import { StorageImage } from "../../components/PlaceCard";
 
 mapboxgl.accessToken = MAPBOX_TOKEN;
@@ -22,12 +21,11 @@ export default function NyPage() {
   const [description, setDescription] = useState("");
   const [email, setEmail] = useState("");
   const [amenities, setAmenities] = useState<string[]>([]);
-  const [photos, setPhotos] = useState<Id<"_storage">[]>([]);
+  const [photos, setPhotos] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   const createSubmission = useMutation(api.submissions.create);
-  const generateUploadUrl = useMutation(api.submissions.generateUploadUrl);
 
   const handleSubmit = useCallback(async () => {
     if (!lat || !lng || !title.trim()) return;
@@ -49,23 +47,37 @@ export default function NyPage() {
   const handlePhotoUpload = useCallback(
     async (files: FileList) => {
       setUploading(true);
-      const newIds: Id<"_storage">[] = [];
+      const uploadedPhotoUrls: string[] = [];
       for (const file of Array.from(files).slice(0, 12 - photos.length)) {
-        const url = await generateUploadUrl();
-        const res = await fetch(url, {
+        const uploadTargetResponse = await fetch("/api/uploads/images", {
           method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contentType: file.type,
+            fileName: file.name,
+          }),
+        });
+        if (!uploadTargetResponse.ok) {
+          continue;
+        }
+
+        const { publicUrl, uploadUrl } = (await uploadTargetResponse.json()) as {
+          publicUrl: string;
+          uploadUrl: string;
+        };
+        const uploadResponse = await fetch(uploadUrl, {
+          method: "PUT",
           headers: { "Content-Type": file.type },
           body: file,
         });
-        if (res.ok) {
-          const { storageId } = await res.json();
-          newIds.push(storageId);
+        if (uploadResponse.ok) {
+          uploadedPhotoUrls.push(publicUrl);
         }
       }
-      setPhotos((prev) => [...prev, ...newIds]);
+      setPhotos((prev) => [...prev, ...uploadedPhotoUrls]);
       setUploading(false);
     },
-    [photos, generateUploadUrl]
+    [photos]
   );
 
   if (step === "done") {
@@ -241,9 +253,9 @@ export default function NyPage() {
                 {photos.length} bilde{photos.length !== 1 ? "r" : ""} lastet opp
               </p>
               <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
-                {photos.map((id, i) => (
-                  <div key={id} className="relative group aspect-square rounded-lg overflow-hidden border border-[var(--color-stone)]/15">
-                    <StorageImage storageId={id} alt={`Bilde ${i + 1}`} className="rounded-lg" />
+                {photos.map((imageUrl, i) => (
+                  <div key={imageUrl} className="relative group aspect-square rounded-lg overflow-hidden border border-[var(--color-stone)]/15">
+                    <StorageImage imageUrl={imageUrl} alt={`Bilde ${i + 1}`} className="rounded-lg" />
                     <button
                       type="button"
                       onClick={() => setPhotos((prev) => prev.filter((_, idx) => idx !== i))}

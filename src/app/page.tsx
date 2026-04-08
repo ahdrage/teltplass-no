@@ -5,12 +5,7 @@ import { useState } from "react";
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { PlaceCard, StorageImage } from "../components/PlaceCard";
-import { Id } from "../../convex/_generated/dataModel";
-import {
-  collectVisibleStorageIds,
-  dedupeCities,
-  getVisibleItems,
-} from "@/lib/homeData";
+import { dedupeCities, getVisibleItems } from "@/lib/homeData";
 
 const INITIAL_FEATURED_COUNT = 4;
 const INITIAL_CITY_COUNT = 12;
@@ -31,32 +26,6 @@ export default function Home() {
     preparedCities,
     INITIAL_CITY_COUNT,
     isCitiesExpanded,
-  );
-  const featuredStorageIds = collectVisibleStorageIds(
-    visibleFeatured.map((place) => (place.photoMain ?? place.photos[0]) as string | undefined),
-  ) as Id<"_storage">[];
-  const cityStorageIds = collectVisibleStorageIds(
-    visibleCities.map((city) => city.image as string | undefined),
-  ) as Id<"_storage">[];
-  const featuredImageUrls = useQuery(
-    api.storage.getUrls,
-    featuredStorageIds.length > 0 ? { storageIds: featuredStorageIds } : "skip",
-  );
-  const cityImageUrls = useQuery(
-    api.storage.getUrls,
-    cityStorageIds.length > 0 ? { storageIds: cityStorageIds } : "skip",
-  );
-  const featuredImageUrlById = new Map(
-    featuredStorageIds.map((storageId, index) => [
-      storageId,
-      featuredImageUrls?.[index] ?? null,
-    ]),
-  );
-  const cityImageUrlById = new Map(
-    cityStorageIds.map((storageId, index) => [
-      storageId,
-      cityImageUrls?.[index] ?? null,
-    ]),
   );
 
   return (
@@ -119,10 +88,7 @@ export default function Home() {
                   slug={place.slug}
                   description={place.description}
                   amenities={place.amenities}
-                  photoMain={place.photoMain ?? place.photos[0]}
-                  imageUrl={featuredImageUrlById.get(
-                    (place.photoMain ?? place.photos[0]) as Id<"_storage">,
-                  )}
+                  imageUrl={place.photoMain ?? place.photos[0] ?? null}
                   index={i}
                   preload={i < 2}
                 />
@@ -178,11 +144,7 @@ export default function Home() {
                     key={city._id}
                     city={city}
                     index={i}
-                    imageUrl={
-                      city.image
-                        ? cityImageUrlById.get(city.image as Id<"_storage">)
-                        : null
-                    }
+                    imageUrl={city.image ?? null}
                   />
                 ))}
               </div>
@@ -225,7 +187,7 @@ function CityCard({
     name: string;
     slug: string;
     placeCount: number;
-    image?: Id<"_storage">;
+    image?: string;
   };
   index: number;
   imageUrl?: string | null;
@@ -240,7 +202,6 @@ function CityCard({
       <div className="absolute inset-0 bg-[var(--color-night)]">
         {city.image && (
           <StorageImage
-            storageId={city.image}
             imageUrl={imageUrl}
             alt={city.name}
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 16vw"

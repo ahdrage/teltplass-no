@@ -15,6 +15,7 @@ if (!CONVEX_URL) {
 
 import { ConvexHttpClient } from "convex/browser";
 import { api } from "../convex/_generated/api";
+import { uploadBufferToBackblaze } from "../src/lib/backblaze.server";
 
 interface RawPlaceNew {
   addresse: string;
@@ -107,19 +108,14 @@ async function uploadImage(
     if (!res.ok) return null;
     const blob = await res.blob();
     if (blob.size < 100) return null;
-
-    const uploadUrl: string = await client.mutation(
-      api.seed.generateUploadUrl,
-      {}
-    );
-    const uploadRes = await fetch(uploadUrl, {
-      method: "POST",
-      headers: { "Content-Type": blob.type || "image/jpeg" },
-      body: blob,
+    const buffer = Buffer.from(await blob.arrayBuffer());
+    return await uploadBufferToBackblaze({
+      body: buffer,
+      contentType: blob.type || "image/jpeg",
+      entityId: crypto.randomUUID(),
+      fileName: new URL(url).pathname.split("/").pop() || "seed-image.jpg",
+      folder: "seed",
     });
-    if (!uploadRes.ok) return null;
-    const { storageId } = (await uploadRes.json()) as { storageId: string };
-    return storageId;
   } catch (e) {
     console.error(`  Failed to upload ${url}: ${e}`);
     return null;

@@ -8,9 +8,9 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "**.convex.cloud",
+        hostname: "**.backblazeb2.com",
         port: "",
-        pathname: "/api/storage/**",
+        pathname: "/file/**",
         search: "",
       },
     ],

@@ -76,7 +76,7 @@ export default function StederContent() {
       {/* Hero */}
       <section className="relative h-[40vh] min-h-[280px] overflow-hidden">
         <div className="absolute inset-0 bg-[var(--color-night)]">
-          {city.image && <StorageImage storageId={city.image} alt={city.name} className="opacity-60" />}
+          {city.image && <StorageImage imageUrl={city.image} alt={city.name} className="opacity-60" />}
         </div>
         <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-night)]/80 to-transparent" />
         <div className="relative h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col justify-end pb-10">
@@ -100,7 +100,7 @@ export default function StederContent() {
                 slug={place.slug}
                 description={place.description}
                 amenities={place.amenities}
-                photoMain={place.photoMain ?? place.photos?.[0]}
+                imageUrl={place.photoMain ?? place.photos?.[0] ?? null}
                 distance={place.distance}
                 index={i}
               />

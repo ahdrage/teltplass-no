@@ -10,8 +10,8 @@ export const insertPlace = mutation({
     lat: v.number(),
     lng: v.number(),
     amenities: v.array(v.string()),
-    photos: v.array(v.id("_storage")),
-    photoMain: v.optional(v.id("_storage")),
+    photos: v.array(v.string()),
+    photoMain: v.optional(v.string()),
     approved: v.boolean(),
     oldPath: v.optional(v.string()),
     createdAt: v.number(),
@@ -27,17 +27,10 @@ export const insertCity = mutation({
     slug: v.string(),
     lat: v.number(),
     lng: v.number(),
-    image: v.optional(v.id("_storage")),
+    image: v.optional(v.string()),
     placeCount: v.number(),
   },
   handler: async (ctx, args) => {
     return await ctx.db.insert("cities", args);
-  },
-});
-
-export const generateUploadUrl = mutation({
-  args: {},
-  handler: async (ctx) => {
-    return await ctx.storage.generateUploadUrl();
   },
 });

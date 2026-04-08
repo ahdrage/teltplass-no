@@ -8,7 +8,6 @@ import { useEffect, useRef, useState } from "react";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { MAPBOX_TOKEN } from "../../../lib/constants";
-import { Id } from "../../../../convex/_generated/dataModel";
 
 mapboxgl.accessToken = MAPBOX_TOKEN;
 
@@ -59,7 +58,7 @@ export default function TeltplassContent() {
       <section className="max-w-5xl mx-auto px-4 sm:px-6 pt-6 pb-4">
         <div className="relative aspect-[16/9] rounded-xl overflow-hidden bg-[var(--color-sand)]">
           {hasPhotos ? (
-            <GalleryImage storageId={allPhotos[activePhoto]} alt={place.title} />
+            <GalleryImage imageUrl={allPhotos[activePhoto]} alt={place.title} />
           ) : (
             <PlaceholderImage />
           )}
@@ -100,7 +99,7 @@ export default function TeltplassContent() {
                   i === activePhoto ? "border-[var(--color-ember)]" : "border-transparent"
                 }`}
               >
-                <GalleryImage storageId={id} alt={`${place.title} ${i + 1}`} />
+                <GalleryImage imageUrl={id} alt={`${place.title} ${i + 1}`} />
               </button>
             ))}
           </div>
@@ -161,7 +160,7 @@ export default function TeltplassContent() {
                 slug={p.slug}
                 description={p.description}
                 amenities={p.amenities}
-                photoMain={p.photoMain ?? p.photos?.[0]}
+                imageUrl={p.photoMain ?? p.photos?.[0] ?? null}
                 distance={p.distance}
                 index={i}
               />
@@ -173,12 +172,11 @@ export default function TeltplassContent() {
   );
 }
 
-function GalleryImage({ storageId, alt }: { storageId: Id<"_storage">; alt: string }) {
-  const url = useQuery(api.storage.getUrl, { storageId });
+function GalleryImage({ imageUrl, alt }: { imageUrl?: string; alt: string }) {
   const [failed, setFailed] = useState(false);
-  if (!url) return <div className="w-full h-full bg-[var(--color-sand)] animate-pulse" />;
+  if (!imageUrl) return <div className="w-full h-full bg-[var(--color-sand)] animate-pulse" />;
   if (failed) return <PlaceholderImage />;
-  return <img src={url} alt={alt} className="w-full h-full object-cover" onError={() => setFailed(true)} />;
+  return <img src={imageUrl} alt={alt} className="w-full h-full object-cover" onError={() => setFailed(true)} />;
 }
 
 function ShareButton({ title, slug }: { title: string; slug: string }) {

@@ -9,7 +9,7 @@ export const create = mutation({
     lat: v.number(),
     lng: v.number(),
     amenities: v.array(v.string()),
-    photos: v.array(v.id("_storage")),
+    photos: v.array(v.string()),
     submitterEmail: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
@@ -74,12 +74,5 @@ export const reject = mutation({
   args: { id: v.id("submissions") },
   handler: async (ctx, args) => {
     await ctx.db.patch(args.id, { status: "rejected" });
-  },
-});
-
-export const generateUploadUrl = mutation({
-  args: {},
-  handler: async (ctx) => {
-    return await ctx.storage.generateUploadUrl();
   },
 });

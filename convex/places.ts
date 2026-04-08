@@ -101,13 +101,6 @@ export const forCity = query({
   },
 });
 
-export const getImageUrl = query({
-  args: { storageId: v.id("_storage") },
-  handler: async (ctx, args) => {
-    return await ctx.storage.getUrl(args.storageId);
-  },
-});
-
 export const approve = mutation({
   args: { id: v.id("places"), approved: v.boolean() },
   handler: async (ctx, args) => {
