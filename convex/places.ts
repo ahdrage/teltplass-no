@@ -1,36 +1,45 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
+import {
+  dedupePlaces,
+  pickBestCityRecord,
+  pickBestPlaceRecord,
+} from "../src/lib/homeData";
 
 export const list = query({
   args: { onlyApproved: v.optional(v.boolean()) },
   handler: async (ctx, args) => {
     if (args.onlyApproved !== false) {
-      return await ctx.db
+      const places = await ctx.db
         .query("places")
         .withIndex("by_approved", (q) => q.eq("approved", true))
         .collect();
+      return dedupePlaces(places);
     }
-    return await ctx.db.query("places").collect();
+    const places = await ctx.db.query("places").collect();
+    return dedupePlaces(places);
   },
 });
 
 export const getBySlug = query({
   args: { slug: v.string() },
   handler: async (ctx, args) => {
-    return await ctx.db
+    const places = await ctx.db
       .query("places")
       .withIndex("by_slug", (q) => q.eq("slug", args.slug))
-      .unique();
+      .collect();
+    return pickBestPlaceRecord(places) ?? null;
   },
 });
 
 export const getByOldPath = query({
   args: { oldPath: v.string() },
   handler: async (ctx, args) => {
-    return await ctx.db
+    const places = await ctx.db
       .query("places")
       .withIndex("by_old_path", (q) => q.eq("oldPath", args.oldPath))
-      .unique();
+      .collect();
+    return pickBestPlaceRecord(places) ?? null;
   },
 });
 
@@ -41,7 +50,7 @@ export const featured = query({
       .query("places")
       .withIndex("by_approved", (q) => q.eq("approved", true))
       .collect();
-    return places
+    return dedupePlaces(places)
       .filter((p) => (p.photoMain !== undefined || p.photos.length > 0))
       .slice(0, 8);
   },
@@ -55,7 +64,7 @@ export const nearby = query({
       .withIndex("by_approved", (q) => q.eq("approved", true))
       .collect();
 
-    const withDist = all
+    const withDist = dedupePlaces(all)
       .filter((p) => p.slug !== args.excludeSlug)
       .map((p) => ({
         ...p,
@@ -70,10 +79,11 @@ export const nearby = query({
 export const forCity = query({
   args: { citySlug: v.string() },
   handler: async (ctx, args) => {
-    const city = await ctx.db
+    const cities = await ctx.db
       .query("cities")
       .withIndex("by_slug", (q) => q.eq("slug", args.citySlug))
-      .unique();
+      .collect();
+    const city = pickBestCityRecord(cities);
     if (!city) return [];
 
     const all = await ctx.db
@@ -81,7 +91,7 @@ export const forCity = query({
       .withIndex("by_approved", (q) => q.eq("approved", true))
       .collect();
 
-    return all
+    return dedupePlaces(all)
       .map((p) => ({
         ...p,
         distance: haversine(city.lat, city.lng, p.lat, p.lng),

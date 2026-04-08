@@ -1,20 +1,23 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
+import { dedupeCities, pickBestCityRecord } from "../src/lib/homeData";
 
 export const list = query({
   args: {},
   handler: async (ctx) => {
-    return await ctx.db.query("cities").collect();
+    const cities = await ctx.db.query("cities").collect();
+    return dedupeCities(cities);
   },
 });
 
 export const getBySlug = query({
   args: { slug: v.string() },
   handler: async (ctx, args) => {
-    return await ctx.db
+    const cities = await ctx.db
       .query("cities")
       .withIndex("by_slug", (q) => q.eq("slug", args.slug))
-      .unique();
+      .collect();
+    return pickBestCityRecord(cities) ?? null;
   },
 });
 

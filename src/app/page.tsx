@@ -1,13 +1,33 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { PlaceCard, StorageImage } from "../components/PlaceCard";
+import { Id } from "../../convex/_generated/dataModel";
+import { dedupeCities, getVisibleItems } from "@/lib/homeData";
+
+const INITIAL_FEATURED_COUNT = 4;
+const INITIAL_CITY_COUNT = 12;
 
 export default function Home() {
   const featured = useQuery(api.places.featured);
   const cities = useQuery(api.cities.list);
+  const [isFeaturedExpanded, setIsFeaturedExpanded] = useState(false);
+  const [isCitiesExpanded, setIsCitiesExpanded] = useState(false);
+
+  const visibleFeatured = featured
+    ? getVisibleItems(featured, INITIAL_FEATURED_COUNT, isFeaturedExpanded)
+    : [];
+  const preparedCities = cities
+    ? dedupeCities(cities.filter((city) => city.placeCount > 0))
+    : [];
+  const visibleCities = getVisibleItems(
+    preparedCities,
+    INITIAL_CITY_COUNT,
+    isCitiesExpanded,
+  );
 
   return (
     <>
@@ -60,22 +80,38 @@ export default function Home() {
           Populære teltplasser med bilder fra fellesskapet
         </p>
         {featured ? (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {featured.map((place, i) => (
-              <PlaceCard
-                key={place._id}
-                title={place.title}
-                slug={place.slug}
-                description={place.description}
-                amenities={place.amenities}
-                photoMain={place.photoMain ?? place.photos[0]}
-                index={i}
-              />
-            ))}
-          </div>
+          <>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+              {visibleFeatured.map((place, i) => (
+                <PlaceCard
+                  key={place._id}
+                  title={place.title}
+                  slug={place.slug}
+                  description={place.description}
+                  amenities={place.amenities}
+                  photoMain={place.photoMain ?? place.photos[0]}
+                  index={i}
+                />
+              ))}
+            </div>
+            {featured.length > INITIAL_FEATURED_COUNT ? (
+              <div className="mt-8 flex justify-center">
+                <button
+                  type="button"
+                  className="px-5 py-2.5 rounded-lg border border-[var(--color-stone)]/30 text-[var(--color-bark)] font-body font-semibold hover:bg-[var(--color-cloud)] transition-colors"
+                  aria-expanded={isFeaturedExpanded}
+                  onClick={() => setIsFeaturedExpanded((value) => !value)}
+                >
+                  {isFeaturedExpanded
+                    ? "Vis færre teltplasser"
+                    : "Vis flere teltplasser"}
+                </button>
+              </div>
+            ) : null}
+          </>
         ) : (
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {Array.from({ length: 8 }).map((_, i) => (
+            {Array.from({ length: INITIAL_FEATURED_COUNT }).map((_, i) => (
               <div
                 key={i}
                 className="bg-[var(--color-cloud)] rounded-xl border border-[var(--color-stone)]/15 overflow-hidden"
@@ -101,17 +137,28 @@ export default function Home() {
             Finn teltplasser nær din neste destinasjon
           </p>
           {cities ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-              {cities
-                .filter((c) => c.placeCount > 0)
-                .sort((a, b) => b.placeCount - a.placeCount)
-                .map((city, i) => (
+            <>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                {visibleCities.map((city, i) => (
                   <CityCard key={city._id} city={city} index={i} />
                 ))}
-            </div>
+              </div>
+              {preparedCities.length > INITIAL_CITY_COUNT ? (
+                <div className="mt-8 flex justify-center">
+                  <button
+                    type="button"
+                    className="px-5 py-2.5 rounded-lg border border-[var(--color-stone)]/30 text-[var(--color-bark)] font-body font-semibold hover:bg-white transition-colors"
+                    aria-expanded={isCitiesExpanded}
+                    onClick={() => setIsCitiesExpanded((value) => !value)}
+                  >
+                    {isCitiesExpanded ? "Vis færre steder" : "Vis flere steder"}
+                  </button>
+                </div>
+              ) : null}
+            </>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-              {Array.from({ length: 12 }).map((_, i) => (
+              {Array.from({ length: INITIAL_CITY_COUNT }).map((_, i) => (
                 <div
                   key={i}
                   className="aspect-[3/4] bg-[var(--color-sand)] rounded-xl animate-pulse"
@@ -129,7 +176,13 @@ function CityCard({
   city,
   index,
 }: {
-  city: { _id: string; name: string; slug: string; placeCount: number; image?: any };
+  city: {
+    _id: string;
+    name: string;
+    slug: string;
+    placeCount: number;
+    image?: Id<"_storage">;
+  };
   index: number;
 }) {
   return (
