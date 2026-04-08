@@ -1,14 +1,25 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { Id } from "../../../convex/_generated/dataModel";
+import { useSearchParams } from "next/navigation";
 
 const ADMIN_PASSWORD = "teltplass-admin-2026";
 
 export default function AdminPage() {
-  const [authenticated, setAuthenticated] = useState(false);
+  return (
+    <Suspense fallback={<div className="max-w-sm mx-auto px-4 py-24"><div className="h-8 bg-[var(--color-stone)]/10 rounded-xl animate-pulse" /></div>}>
+      <AdminContent />
+    </Suspense>
+  );
+}
+
+function AdminContent() {
+  const searchParams = useSearchParams();
+  const bypassKey = searchParams.get("key") === ADMIN_PASSWORD;
+  const [authenticated, setAuthenticated] = useState(bypassKey);
   const [password, setPassword] = useState("");
   const [tab, setTab] = useState<"submissions" | "places" | "subscribers">("submissions");
 

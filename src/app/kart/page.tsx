@@ -102,8 +102,8 @@ export default function KartPage() {
       filter: ["!", ["has", "point_count"]],
       paint: {
         "circle-color": "#C8593A",
-        "circle-radius": 8,
-        "circle-stroke-width": 2,
+        "circle-radius": 10,
+        "circle-stroke-width": 2.5,
         "circle-stroke-color": "#F5F0E8",
       },
     });
@@ -112,14 +112,12 @@ export default function KartPage() {
       const features = map.queryRenderedFeatures(e.point, { layers: ["clusters"] });
       const clusterId = features[0]?.properties?.cluster_id;
       if (clusterId == null) return;
-      (map.getSource("places") as mapboxgl.GeoJSONSource).getClusterExpansionZoom(
-        clusterId,
-        (err, zoom) => {
-          if (err || zoom == null) return;
-          const coords = (features[0].geometry as GeoJSON.Point).coordinates;
-          map.easeTo({ center: coords as [number, number], zoom });
-        }
-      );
+      const source = map.getSource("places") as mapboxgl.GeoJSONSource;
+      source.getClusterExpansionZoom(clusterId, (err, zoom) => {
+        if (err || zoom == null) return;
+        const coords = (features[0].geometry as GeoJSON.Point).coordinates;
+        map.easeTo({ center: coords as [number, number], zoom });
+      });
     });
 
     map.on("click", "unclustered-point", (e) => {
@@ -160,10 +158,10 @@ export default function KartPage() {
       <div ref={mapContainer} className="absolute inset-0" />
 
       {/* Filter bar */}
-      <div className="absolute top-4 left-4 right-4 z-10 flex flex-wrap gap-2">
+      <div className="absolute top-4 left-4 right-4 z-10 flex flex-wrap gap-2 pointer-events-none">
         <Link
           href="/sok"
-          className="px-4 py-2.5 rounded-lg bg-[var(--color-cloud)] shadow-md border border-[var(--color-stone)]/15 font-body text-sm text-[var(--color-stone)] hover:text-[var(--color-bark)] transition-colors flex items-center gap-2"
+          className="pointer-events-auto px-4 py-2.5 rounded-lg bg-[var(--color-cloud)] shadow-md border border-[var(--color-stone)]/15 font-body text-sm text-[var(--color-stone)] hover:text-[var(--color-bark)] transition-colors flex items-center gap-2"
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <circle cx="11" cy="11" r="8" />
@@ -175,7 +173,7 @@ export default function KartPage() {
           <button
             key={key}
             onClick={() => toggleFilter(key)}
-            className={`px-3 py-2 rounded-lg text-xs font-body font-medium shadow-sm border transition-all ${
+            className={`pointer-events-auto px-3 py-2 rounded-lg text-xs font-body font-medium shadow-sm border transition-all ${
               selectedFilters.includes(key)
                 ? "bg-[var(--color-moss)] text-white border-[var(--color-moss)]"
                 : "bg-[var(--color-cloud)] text-[var(--color-bark)] border-[var(--color-stone)]/15 hover:border-[var(--color-moss)]"

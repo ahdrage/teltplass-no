@@ -49,23 +49,33 @@ export default function SokPage() {
     return () => { map.remove(); mapRef.current = null; };
   }, []);
 
+  const markersRef = useRef<mapboxgl.Marker[]>([]);
+
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !results.length) return;
 
-    const markers = document.querySelectorAll(".search-marker");
-    markers.forEach((m) => m.remove());
+    markersRef.current.forEach((m) => m.remove());
+    markersRef.current = [];
 
     results.forEach((p) => {
       const el = document.createElement("div");
-      el.className = "search-marker";
-      el.style.width = "12px";
-      el.style.height = "12px";
+      el.style.width = "14px";
+      el.style.height = "14px";
       el.style.borderRadius = "50%";
       el.style.backgroundColor = "#C8593A";
       el.style.border = "2px solid #F5F0E8";
       el.style.cursor = "pointer";
-      new mapboxgl.Marker(el).setLngLat([p.lng, p.lat]).addTo(map);
+      el.style.boxShadow = "0 2px 6px rgba(0,0,0,0.25)";
+      el.addEventListener("click", (e) => {
+        e.stopPropagation();
+        new mapboxgl.Popup({ offset: 10, maxWidth: "250px" })
+          .setLngLat([p.lng, p.lat])
+          .setHTML(`<div style="padding:10px;font-family:'Source Sans 3',sans-serif"><a href="/teltplass/${p.slug}" style="font-family:'DM Serif Display',serif;font-size:15px;color:#2C2418;text-decoration:none">${p.title}</a></div>`)
+          .addTo(map);
+      });
+      const marker = new mapboxgl.Marker(el).setLngLat([p.lng, p.lat]).addTo(map);
+      markersRef.current.push(marker);
     });
 
     if (results.length === 1) {

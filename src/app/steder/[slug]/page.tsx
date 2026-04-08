@@ -17,6 +17,7 @@ export default function StederPage() {
   const places = useQuery(api.places.forCity, { citySlug: slug });
   const mapContainer = useRef<HTMLDivElement>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
+  const markersRef = useRef<mapboxgl.Marker[]>([]);
 
   useEffect(() => {
     if (!mapContainer.current || mapRef.current || !city) return;
@@ -34,21 +35,26 @@ export default function StederPage() {
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !places) return;
+    markersRef.current.forEach((m) => m.remove());
+    markersRef.current = [];
     places.forEach((p) => {
       const el = document.createElement("div");
-      el.style.width = "14px";
-      el.style.height = "14px";
+      el.style.width = "18px";
+      el.style.height = "18px";
       el.style.borderRadius = "50%";
       el.style.backgroundColor = "#C8593A";
       el.style.border = "2px solid #F5F0E8";
       el.style.cursor = "pointer";
-      const marker = new mapboxgl.Marker(el).setLngLat([p.lng, p.lat]).addTo(map);
-      marker.getElement().addEventListener("click", () => {
-        new mapboxgl.Popup({ offset: 10, maxWidth: "250px" })
+      el.style.boxShadow = "0 2px 6px rgba(0,0,0,0.25)";
+      el.addEventListener("click", (e) => {
+        e.stopPropagation();
+        new mapboxgl.Popup({ offset: 12, maxWidth: "250px" })
           .setLngLat([p.lng, p.lat])
           .setHTML(`<div style="padding:10px;font-family:'Source Sans 3',sans-serif"><a href="/teltplass/${p.slug}" style="font-family:'DM Serif Display',serif;font-size:15px;color:#2C2418;text-decoration:none">${p.title}</a><br><span style="font-size:12px;color:#8C8578">${p.distance?.toFixed(1)} km unna</span></div>`)
           .addTo(map);
       });
+      const marker = new mapboxgl.Marker(el).setLngLat([p.lng, p.lat]).addTo(map);
+      markersRef.current.push(marker);
     });
   }, [places]);
 
