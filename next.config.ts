@@ -10,7 +10,7 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "**.backblazeb2.com",
         port: "",
-        pathname: "/file/**",
+        pathname: "/**",
         search: "",
       },
     ],
