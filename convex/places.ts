@@ -42,7 +42,7 @@ export const featured = query({
       .withIndex("by_approved", (q) => q.eq("approved", true))
       .collect();
     return places
-      .filter((p) => p.photos.length > 0)
+      .filter((p) => (p.photoMain !== undefined || p.photos.length > 0))
       .slice(0, 8);
   },
 });

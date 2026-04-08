@@ -93,16 +93,23 @@ export function StorageImage({
 
 export function PlaceholderImage() {
   return (
-    <div className="w-full h-full bg-[var(--color-sand)] topo-bg flex items-center justify-center">
-      <svg
-        width="48"
-        height="48"
-        viewBox="0 0 40 40"
-        fill="none"
-        className="text-[var(--color-stone)]/30"
-      >
-        <path d="M20 4L36 36H4L20 4Z" fill="currentColor" />
-      </svg>
+    <div className="w-full h-full relative overflow-hidden">
+      <img
+        src="/teltplass.webp"
+        alt=""
+        className="w-full h-full object-cover blur-[6px] scale-110 brightness-90"
+      />
+      <div className="absolute inset-0 flex items-center justify-center bg-[var(--color-bark)]/15">
+        <svg
+          width="36"
+          height="36"
+          viewBox="0 0 40 40"
+          fill="none"
+          className="text-white/60 drop-shadow-md"
+        >
+          <path d="M20 4L36 36H4L20 4Z" fill="currentColor" />
+        </svg>
+      </div>
     </div>
   );
 }
