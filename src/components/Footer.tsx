@@ -12,8 +12,8 @@ export function Footer() {
         <div className="grid md:grid-cols-3 gap-12">
           <div>
             <div className="flex items-center gap-2 mb-4">
-              <svg width="24" height="24" viewBox="0 0 40 40" fill="none">
-                <path d="M20 4L36 36H4L20 4Z" fill="currentColor" />
+              <svg width="24" height="22" viewBox="0 0 365 330" fill="none">
+                <path d="M182.457031,0.6796875 L363.539062,328.21875 L0.68359375,328.21875 L182.457031,0.6796875 Z M182.311865,95.4492188 L76.8680962,285.449219 L130.500568,285.449219 L153.403134,248.254918 L175.980438,285.449219 L287.35456,285.449219 L182.311865,95.4492188 Z" fill="currentColor" fillRule="evenodd" />
               </svg>
               <span className="font-display text-lg">Teltplass</span>
             </div>

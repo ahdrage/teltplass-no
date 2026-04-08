@@ -117,6 +117,10 @@ export const update = mutation({
     id: v.id("places"),
     title: v.optional(v.string()),
     description: v.optional(v.string()),
+    address: v.optional(v.string()),
+    lat: v.optional(v.number()),
+    lng: v.optional(v.number()),
+    amenities: v.optional(v.array(v.string())),
     approved: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {

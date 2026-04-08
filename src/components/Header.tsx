@@ -14,14 +14,15 @@ export function Header() {
         <Link href="/" className="flex items-center gap-2 group">
           <svg
             width="28"
-            height="28"
-            viewBox="0 0 40 40"
+            height="25"
+            viewBox="0 0 365 330"
             fill="none"
             className="text-[var(--color-bark)] group-hover:text-[var(--color-ember)] transition-colors"
           >
             <path
-              d="M20 4L36 36H4L20 4Z"
+              d="M182.457031,0.6796875 L363.539062,328.21875 L0.68359375,328.21875 L182.457031,0.6796875 Z M182.311865,95.4492188 L76.8680962,285.449219 L130.500568,285.449219 L153.403134,248.254918 L175.980438,285.449219 L287.35456,285.449219 L182.311865,95.4492188 Z"
               fill="currentColor"
+              fillRule="evenodd"
             />
           </svg>
           <span className="font-display text-xl text-[var(--color-bark)]">

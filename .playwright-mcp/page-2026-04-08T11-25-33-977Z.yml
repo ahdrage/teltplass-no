@@ -1,0 +1,44 @@
+- generic [ref=e2]:
+  - generic [ref=e4]:
+    - generic [ref=e7] [cursor=pointer]: Teltplass
+    - generic [ref=e8] [cursor=pointer]: 
+  - generic [ref=e11]:
+    - generic [ref=e12]: Finn teltplasser i hele Norge
+    - generic [ref=e13]:
+      - button "Finn teltplasser" [ref=e14] [cursor=pointer]
+      - button "Legg til teltplass" [ref=e15] [cursor=pointer]
+  - generic [ref=e17]:
+    - generic [ref=e18]: Nylig lagt til
+    - generic [ref=e19]:
+      - generic [ref=e22] [cursor=pointer]: Kjøvangen
+      - generic [ref=e25] [cursor=pointer]: Stor fin plass ved Krokstrand
+      - generic [ref=e28] [cursor=pointer]: Ved Holvik stranda
+      - generic [ref=e31] [cursor=pointer]: Lothastranda, Røvær
+      - generic [ref=e34] [cursor=pointer]: Brannodden
+      - generic [ref=e37] [cursor=pointer]: Flott utsiktsplass
+      - generic [ref=e40] [cursor=pointer]: Hoøya
+  - generic [ref=e42]:
+    - generic [ref=e43]: Steder
+    - generic [ref=e44]:
+      - generic [ref=e47] [cursor=pointer]: Tromsø
+      - generic [ref=e50] [cursor=pointer]: Vestfold
+      - generic [ref=e53] [cursor=pointer]: Østfold
+      - generic [ref=e56] [cursor=pointer]: Svolvær
+      - generic [ref=e59] [cursor=pointer]: Saltstraumen
+      - generic [ref=e62] [cursor=pointer]: Gjøvik
+      - generic [ref=e65] [cursor=pointer]: Oslo
+  - generic [ref=e66]:
+    - generic [ref=e67]:
+      - generic [ref=e68]: Hold deg oppdatert
+      - generic [ref=e69]: Meld deg på vårt nyhetsbrev og bli den første som får beskjed om nye teltplasser.
+      - generic [ref=e70]:
+        - textbox "Din e-postadresse" [ref=e71]
+        - button "Abonner" [ref=e72] [cursor=pointer]
+    - generic [ref=e73]:
+      - generic [ref=e74]: Kjøp oss en kaffe
+      - generic [ref=e75]: Hjelp med å finansiere prosjektet og kjøp oss en kaffe.
+      - generic [ref=e76]: VIPPS til 746539
+  - generic [ref=e78]:
+    - generic [ref=e81] [cursor=pointer]: Teltplass
+    - generic [ref=e82] [cursor=pointer]: hei@teltplass.no
+    - generic [ref=e83]: Copyright © 2022. Alle rettigheter forbeholdes.

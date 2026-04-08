@@ -5,18 +5,38 @@ import { Header } from "../components/Header";
 import { Footer } from "../components/Footer";
 import { ErrorBoundary } from "../components/ErrorBoundary";
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://teltplass.no";
+
 export const metadata: Metadata = {
   title: {
     default: "Teltplass.no - Finn teltplasser i hele Norge",
     template: "%s | Teltplass.no",
   },
   description:
-    "Finn de beste teltplassene i hele Norge. Delt av friluftsfolk, for friluftsfolk.",
+    "Teltplass gir deg oversikten over de beste teltplassene i Norge. Vet du om en perle? Legg den gjerne inn!",
   openGraph: {
     title: "Teltplass.no - Finn teltplasser i hele Norge",
-    description: "Utforsk over 130 teltplasser over hele Norge.",
+    siteName: "Teltplass.no",
+    description:
+      "Teltplass gir deg oversikten over de beste teltplassene i Norge. Vet du om en perle? Legg den gjerne inn!",
     type: "website",
     locale: "nb_NO",
+    url: siteUrl,
+    images: [
+      {
+        url: `${siteUrl}/teltplass.webp`,
+        width: 1200,
+        height: 630,
+        alt: "Teltplass.no - Finn teltplasser i hele Norge",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Teltplass.no - Finn teltplasser i hele Norge",
+    description:
+      "Teltplass gir deg oversikten over de beste teltplassene i Norge. Vet du om en perle? Legg den gjerne inn!",
+    images: [`${siteUrl}/teltplass.webp`],
   },
 };
 
