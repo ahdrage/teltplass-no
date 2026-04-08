@@ -58,9 +58,19 @@ h1, h2, h3 {
   to { opacity: 1; transform: translateY(0); }
 }
 
+/* Use `both` so the first keyframe applies before the animation runs; avoid a bare
+   `opacity: 0` + `forwards` pair, which can leave nodes invisible if the
+   animation never runs (e.g. prefers-reduced-motion or hydration edge cases). */
 .animate-fade-up {
-  animation: fadeUp 0.5s ease-out forwards;
-  opacity: 0;
+  animation: fadeUp 0.5s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-up {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
 }
 
 @keyframes pulse-ring {
