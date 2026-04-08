@@ -11,10 +11,8 @@ export const getUrl = query({
 export const getUrls = query({
   args: { storageIds: v.array(v.id("_storage")) },
   handler: async (ctx, args) => {
-    const urls: (string | null)[] = [];
-    for (const id of args.storageIds) {
-      urls.push(await ctx.storage.getUrl(id));
-    }
-    return urls;
+    return await Promise.all(
+      args.storageIds.map((storageId) => ctx.storage.getUrl(storageId)),
+    );
   },
 });

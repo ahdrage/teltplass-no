@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 
 import {
+  collectVisibleStorageIds,
   dedupeCities,
   dedupePlaces,
   getVisibleItems,
@@ -106,4 +107,17 @@ test("dedupePlaces keeps one place per slug", () => {
     dedupePlaces(places).map((place) => place._id),
     ["place-2", "place-3"],
   );
+});
+
+test("collectVisibleStorageIds keeps first-seen ids and skips missing values", () => {
+  const ids = collectVisibleStorageIds([
+    "img-1",
+    undefined,
+    "img-2",
+    "img-1",
+    null,
+    "img-3",
+  ]);
+
+  assert.deepEqual(ids, ["img-1", "img-2", "img-3"]);
 });

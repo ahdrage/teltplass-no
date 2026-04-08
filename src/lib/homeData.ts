@@ -123,3 +123,18 @@ export function getVisibleItems<T>(
 
   return items.slice(0, initialCount);
 }
+
+export function collectVisibleStorageIds(
+  storageIds: readonly (string | null | undefined)[],
+): string[] {
+  const uniqueIds = new Set<string>();
+
+  for (const storageId of storageIds) {
+    if (!storageId) {
+      continue;
+    }
+    uniqueIds.add(storageId);
+  }
+
+  return Array.from(uniqueIds);
+}

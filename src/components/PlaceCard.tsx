@@ -5,6 +5,7 @@ import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { Id } from "../../convex/_generated/dataModel";
 import Link from "next/link";
+import Image from "next/image";
 import { AMENITY_CONFIG } from "../lib/constants";
 
 interface PlaceCardProps {
@@ -13,8 +14,11 @@ interface PlaceCardProps {
   description: string;
   amenities: string[];
   photoMain?: Id<"_storage">;
+  imageUrl?: string | null;
   distance?: number;
   index?: number;
+  prefetch?: boolean;
+  preload?: boolean;
 }
 
 export function PlaceCard({
@@ -23,18 +27,28 @@ export function PlaceCard({
   description,
   amenities,
   photoMain,
+  imageUrl,
   distance,
   index = 0,
+  prefetch = false,
+  preload = false,
 }: PlaceCardProps) {
   return (
     <Link
       href={`/teltplass/${slug}`}
+      prefetch={prefetch}
       className="group block bg-[var(--color-cloud)] rounded-xl border border-[var(--color-stone)]/15 overflow-hidden hover:-translate-y-1 hover:shadow-lg transition-all duration-200 animate-fade-up"
       style={{ animationDelay: `${index * 80}ms` }}
     >
       <div className="aspect-[4/3] relative overflow-hidden bg-[var(--color-sand)]">
         {photoMain ? (
-          <StorageImage storageId={photoMain} alt={title} />
+          <StorageImage
+            storageId={photoMain}
+            imageUrl={imageUrl}
+            alt={title}
+            preload={preload}
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+          />
         ) : (
           <PlaceholderImage />
         )}
@@ -67,26 +81,40 @@ export function PlaceCard({
 
 export function StorageImage({
   storageId,
+  imageUrl,
   alt,
   className = "",
+  preload = false,
+  sizes,
 }: {
   storageId: Id<"_storage">;
+  imageUrl?: string | null;
   alt: string;
   className?: string;
+  preload?: boolean;
+  sizes?: string;
 }) {
-  const url = useQuery(api.storage.getUrl, { storageId });
+  const fallbackUrl = useQuery(
+    api.storage.getUrl,
+    imageUrl ? "skip" : { storageId },
+  );
+  const url = imageUrl ?? fallbackUrl;
   const [failed, setFailed] = useState(false);
   if (!url) {
     return <div className={`w-full h-full bg-[var(--color-sand)] animate-pulse ${className}`} />;
   }
   if (failed) return <PlaceholderImage />;
   return (
-    <img
+    <Image
       src={url}
       alt={alt}
+      fill
+      sizes={sizes}
+      preload={preload}
+      loading={preload ? "eager" : "lazy"}
       className={`w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ${className}`}
-      loading="lazy"
       onError={() => setFailed(true)}
+      unoptimized={url.includes(".convex.cloud")}
     />
   );
 }

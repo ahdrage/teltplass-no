@@ -6,7 +6,11 @@ import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { PlaceCard, StorageImage } from "../components/PlaceCard";
 import { Id } from "../../convex/_generated/dataModel";
-import { dedupeCities, getVisibleItems } from "@/lib/homeData";
+import {
+  collectVisibleStorageIds,
+  dedupeCities,
+  getVisibleItems,
+} from "@/lib/homeData";
 
 const INITIAL_FEATURED_COUNT = 4;
 const INITIAL_CITY_COUNT = 12;
@@ -27,6 +31,32 @@ export default function Home() {
     preparedCities,
     INITIAL_CITY_COUNT,
     isCitiesExpanded,
+  );
+  const featuredStorageIds = collectVisibleStorageIds(
+    visibleFeatured.map((place) => (place.photoMain ?? place.photos[0]) as string | undefined),
+  ) as Id<"_storage">[];
+  const cityStorageIds = collectVisibleStorageIds(
+    visibleCities.map((city) => city.image as string | undefined),
+  ) as Id<"_storage">[];
+  const featuredImageUrls = useQuery(
+    api.storage.getUrls,
+    featuredStorageIds.length > 0 ? { storageIds: featuredStorageIds } : "skip",
+  );
+  const cityImageUrls = useQuery(
+    api.storage.getUrls,
+    cityStorageIds.length > 0 ? { storageIds: cityStorageIds } : "skip",
+  );
+  const featuredImageUrlById = new Map(
+    featuredStorageIds.map((storageId, index) => [
+      storageId,
+      featuredImageUrls?.[index] ?? null,
+    ]),
+  );
+  const cityImageUrlById = new Map(
+    cityStorageIds.map((storageId, index) => [
+      storageId,
+      cityImageUrls?.[index] ?? null,
+    ]),
   );
 
   return (
@@ -90,7 +120,11 @@ export default function Home() {
                   description={place.description}
                   amenities={place.amenities}
                   photoMain={place.photoMain ?? place.photos[0]}
+                  imageUrl={featuredImageUrlById.get(
+                    (place.photoMain ?? place.photos[0]) as Id<"_storage">,
+                  )}
                   index={i}
+                  preload={i < 2}
                 />
               ))}
             </div>
@@ -140,7 +174,16 @@ export default function Home() {
             <>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
                 {visibleCities.map((city, i) => (
-                  <CityCard key={city._id} city={city} index={i} />
+                  <CityCard
+                    key={city._id}
+                    city={city}
+                    index={i}
+                    imageUrl={
+                      city.image
+                        ? cityImageUrlById.get(city.image as Id<"_storage">)
+                        : null
+                    }
+                  />
                 ))}
               </div>
               {preparedCities.length > INITIAL_CITY_COUNT ? (
@@ -175,6 +218,7 @@ export default function Home() {
 function CityCard({
   city,
   index,
+  imageUrl,
 }: {
   city: {
     _id: string;
@@ -184,15 +228,24 @@ function CityCard({
     image?: Id<"_storage">;
   };
   index: number;
+  imageUrl?: string | null;
 }) {
   return (
     <Link
       href={`/steder/${city.slug}`}
+      prefetch={false}
       className="group relative aspect-[3/4] rounded-xl overflow-hidden animate-fade-up"
       style={{ animationDelay: `${index * 60}ms` }}
     >
       <div className="absolute inset-0 bg-[var(--color-night)]">
-        {city.image && <StorageImage storageId={city.image} alt={city.name} />}
+        {city.image && (
+          <StorageImage
+            storageId={city.image}
+            imageUrl={imageUrl}
+            alt={city.name}
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 16vw"
+          />
+        )}
       </div>
       <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-night)]/80 to-transparent" />
       <div className="absolute bottom-0 left-0 right-0 p-3">
