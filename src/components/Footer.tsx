@@ -1,0 +1,103 @@
+"use client";
+
+import { useState } from "react";
+import { useMutation } from "convex/react";
+import { api } from "../../convex/_generated/api";
+import Link from "next/link";
+
+export function Footer() {
+  return (
+    <footer className="bg-[var(--color-night)] topo-bg-dark text-[var(--color-sand)]">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="grid md:grid-cols-3 gap-12">
+          <div>
+            <div className="flex items-center gap-2 mb-4">
+              <svg width="24" height="24" viewBox="0 0 40 40" fill="none">
+                <path d="M20 4L36 36H4L20 4Z" fill="currentColor" />
+              </svg>
+              <span className="font-display text-lg">Teltplass</span>
+            </div>
+            <p className="font-body text-sm text-[var(--color-stone)] leading-relaxed">
+              Finn de beste teltplassene i hele Norge. Delt av friluftsfolk, for friluftsfolk.
+            </p>
+          </div>
+
+          <div>
+            <h3 className="font-display text-base mb-4">Utforsk</h3>
+            <nav className="flex flex-col gap-2">
+              <FooterLink href="/kart">Kart</FooterLink>
+              <FooterLink href="/sok">Søk</FooterLink>
+              <FooterLink href="/ny">Legg til teltplass</FooterLink>
+            </nav>
+          </div>
+
+          <div>
+            <h3 className="font-display text-base mb-4">Nyhetsbrev</h3>
+            <p className="font-body text-sm text-[var(--color-stone)] mb-4">
+              Få tips om nye teltplasser rett i innboksen.
+            </p>
+            <NewsletterForm />
+          </div>
+        </div>
+
+        <div className="mt-12 pt-8 border-t border-[var(--color-stone)]/20 text-center">
+          <p className="font-body text-xs text-[var(--color-stone)]">
+            &copy; {new Date().getFullYear()} Teltplass.no — Laget med kjærlighet for naturen
+          </p>
+        </div>
+      </div>
+    </footer>
+  );
+}
+
+function FooterLink({ href, children }: { href: string; children: React.ReactNode }) {
+  return (
+    <Link
+      href={href}
+      className="font-body text-sm text-[var(--color-stone)] hover:text-[var(--color-sand)] transition-colors"
+    >
+      {children}
+    </Link>
+  );
+}
+
+function NewsletterForm() {
+  const [email, setEmail] = useState("");
+  const [submitted, setSubmitted] = useState(false);
+  const subscribe = useMutation(api.newsletter.subscribe);
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!email.trim()) return;
+    await subscribe({ email });
+    setSubmitted(true);
+    setEmail("");
+  }
+
+  if (submitted) {
+    return (
+      <p className="font-body text-sm text-[var(--color-moss)]">
+        Takk! Du er nå påmeldt.
+      </p>
+    );
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="flex gap-2">
+      <input
+        type="email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        placeholder="Din e-postadresse"
+        required
+        className="flex-1 px-4 py-2.5 rounded-lg bg-[var(--color-bark)] border border-[var(--color-stone)]/30 text-[var(--color-sand)] placeholder:text-[var(--color-stone)] font-body text-sm focus:outline-none focus:border-[var(--color-ember)] transition-colors"
+      />
+      <button
+        type="submit"
+        className="px-5 py-2.5 rounded-lg bg-[var(--color-ember)] text-white font-body text-sm font-medium hover:bg-[var(--color-ember-hover)] transition-colors"
+      >
+        Abonner
+      </button>
+    </form>
+  );
+}

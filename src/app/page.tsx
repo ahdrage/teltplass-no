@@ -1,0 +1,155 @@
+"use client";
+
+import Link from "next/link";
+import { useQuery } from "convex/react";
+import { api } from "../../convex/_generated/api";
+import { PlaceCard, StorageImage } from "../components/PlaceCard";
+
+export default function Home() {
+  const featured = useQuery(api.places.featured);
+  const cities = useQuery(api.cities.list);
+
+  return (
+    <>
+      {/* Hero */}
+      <section className="relative h-[85vh] min-h-[500px] overflow-hidden">
+        <div className="absolute inset-0">
+          <img
+            src="/teltplass.webp"
+            alt="Norsk natur"
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-night)] via-[var(--color-night)]/40 to-transparent" />
+        </div>
+        <div className="relative h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col justify-end pb-16 md:pb-20">
+          <h1 className="font-display text-4xl sm:text-5xl md:text-6xl text-white max-w-2xl leading-tight animate-fade-up">
+            Finn teltplasser i hele Norge
+          </h1>
+          <p
+            className="font-body text-lg text-[var(--color-sand)]/80 mt-4 max-w-xl animate-fade-up"
+            style={{ animationDelay: "100ms" }}
+          >
+            Utforsk over 130 teltplasser, delt av friluftsfolk for friluftsfolk.
+          </p>
+          <div
+            className="flex flex-wrap gap-3 mt-8 animate-fade-up"
+            style={{ animationDelay: "200ms" }}
+          >
+            <Link
+              href="/kart"
+              className="px-6 py-3 rounded-lg bg-[var(--color-ember)] text-white font-body font-semibold text-base hover:bg-[var(--color-ember-hover)] transition-colors shadow-lg"
+            >
+              Finn teltplasser
+            </Link>
+            <Link
+              href="/ny"
+              className="px-6 py-3 rounded-lg bg-white/10 backdrop-blur-sm text-white font-body font-semibold text-base border border-white/30 hover:bg-white/20 transition-colors"
+            >
+              Legg til teltplass
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Featured Places */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
+        <h2 className="font-display text-3xl md:text-4xl text-[var(--color-bark)] mb-2">
+          Utvalgte steder
+        </h2>
+        <p className="font-body text-[var(--color-stone)] mb-10">
+          Populære teltplasser med bilder fra fellesskapet
+        </p>
+        {featured ? (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {featured.map((place, i) => (
+              <PlaceCard
+                key={place._id}
+                title={place.title}
+                slug={place.slug}
+                description={place.description}
+                amenities={place.amenities}
+                photoMain={place.photoMain ?? place.photos[0]}
+                index={i}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div
+                key={i}
+                className="bg-[var(--color-cloud)] rounded-xl border border-[var(--color-stone)]/15 overflow-hidden"
+              >
+                <div className="aspect-[4/3] bg-[var(--color-sand)] animate-pulse" />
+                <div className="p-4 space-y-2">
+                  <div className="h-5 bg-[var(--color-sand)] rounded animate-pulse w-3/4" />
+                  <div className="h-3 bg-[var(--color-sand)] rounded animate-pulse w-1/2" />
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
+
+      {/* Cities */}
+      <section className="bg-[var(--color-cloud)] topo-bg py-16 md:py-24">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="font-display text-3xl md:text-4xl text-[var(--color-bark)] mb-2">
+            Utforsk etter sted
+          </h2>
+          <p className="font-body text-[var(--color-stone)] mb-10">
+            Finn teltplasser nær din neste destinasjon
+          </p>
+          {cities ? (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+              {cities
+                .filter((c) => c.placeCount > 0)
+                .sort((a, b) => b.placeCount - a.placeCount)
+                .map((city, i) => (
+                  <CityCard key={city._id} city={city} index={i} />
+                ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+              {Array.from({ length: 12 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="aspect-[3/4] bg-[var(--color-sand)] rounded-xl animate-pulse"
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+    </>
+  );
+}
+
+function CityCard({
+  city,
+  index,
+}: {
+  city: { _id: string; name: string; slug: string; placeCount: number; image?: any };
+  index: number;
+}) {
+  return (
+    <Link
+      href={`/steder/${city.slug}`}
+      className="group relative aspect-[3/4] rounded-xl overflow-hidden animate-fade-up"
+      style={{ animationDelay: `${index * 60}ms` }}
+    >
+      <div className="absolute inset-0 bg-[var(--color-night)]">
+        {city.image && <StorageImage storageId={city.image} alt={city.name} />}
+      </div>
+      <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-night)]/80 to-transparent" />
+      <div className="absolute bottom-0 left-0 right-0 p-3">
+        <h3 className="font-display text-base text-white leading-tight">
+          {city.name}
+        </h3>
+        <p className="font-mono text-xs text-[var(--color-sand)]/70 mt-0.5">
+          {city.placeCount} plasser
+        </p>
+      </div>
+    </Link>
+  );
+}
