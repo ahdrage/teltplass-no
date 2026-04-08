@@ -107,6 +107,7 @@ function SubmissionsTab() {
               <p className="font-body text-sm text-[var(--color-stone)] mt-1 line-clamp-2">{sub.description}</p>
               <p className="font-mono text-xs text-[var(--color-stone)] mt-2">
                 {sub.photos.length} bilder &middot; {sub.amenities.join(", ") || "Ingen fasiliteter"}
+                {sub.submitterEmail && <> &middot; {sub.submitterEmail}</>}
               </p>
             </div>
             <div className="flex gap-2 flex-shrink-0">
