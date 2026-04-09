@@ -172,7 +172,7 @@ function SubmissionsTab() {
                   {sub.photos.length > 0 && (
                     <div className="grid grid-cols-6 sm:grid-cols-8 gap-1.5">
                       {sub.photos.map((photoId, i) => (
-                        <div key={photoId} className="aspect-square rounded-md overflow-hidden border border-[var(--color-stone)]/15 max-w-[80px]">
+                        <div key={photoId} className="aspect-square relative rounded-md overflow-hidden border border-[var(--color-stone)]/15 max-w-[80px]">
                           <StorageImage imageUrl={photoId} alt={`Bilde ${i + 1}`} className="rounded-md" sizes="80px" />
                         </div>
                       ))}
@@ -396,7 +396,7 @@ function PlaceEditPanel({
           {place.photos.length > 0 && (
             <div className="grid grid-cols-6 gap-1.5">
               {place.photos.slice(0, 12).map((photoId, i) => (
-                <div key={photoId} className="aspect-square rounded-md overflow-hidden border border-[var(--color-stone)]/15 max-w-[60px]">
+                <div key={photoId} className="aspect-square relative rounded-md overflow-hidden border border-[var(--color-stone)]/15 max-w-[60px]">
                   <StorageImage imageUrl={photoId} alt={`Bilde ${i + 1}`} className="rounded-md" sizes="60px" />
                 </div>
               ))}
