@@ -29,6 +29,15 @@ export default function NyPage() {
 
   const createSubmission = useMutation(api.submissions.create);
 
+  useEffect(() => {
+    requestAnimationFrame(() => {
+      if (document.activeElement instanceof HTMLElement) {
+        document.activeElement.blur();
+      }
+      window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+    });
+  }, [step]);
+
   const handleLocationSelect = useCallback(
     (newLat: number, newLng: number, addr: string) => {
       setLat(newLat);
