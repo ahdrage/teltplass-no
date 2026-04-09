@@ -25,6 +25,8 @@ export default function NyPage() {
   const [amenities, setAmenities] = useState<string[]>([]);
   const [photos, setPhotos] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   const createSubmission = useMutation(api.submissions.create);
@@ -68,37 +70,77 @@ export default function NyPage() {
   const handlePhotoUpload = useCallback(
     async (files: FileList) => {
       setUploading(true);
-      const uploadedPhotoUrls: string[] = [];
-      for (const file of Array.from(files).slice(0, 12 - photos.length)) {
-        const uploadTargetResponse = await fetch("/api/uploads/images", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            contentType: file.type,
-            fileName: file.name,
-          }),
-        });
-        if (!uploadTargetResponse.ok) {
-          continue;
-        }
+      setUploadError(null);
+      setUploadProgress(0);
 
-        const { publicUrl, uploadUrl } = (await uploadTargetResponse.json()) as {
-          publicUrl: string;
-          uploadUrl: string;
-        };
-        const uploadResponse = await fetch(uploadUrl, {
-          method: "PUT",
-          headers: { "Content-Type": file.type },
-          body: file,
-        });
-        if (uploadResponse.ok) {
-          uploadedPhotoUrls.push(publicUrl);
+      const filesToUpload = Array.from(files).slice(0, 12 - photos.length);
+      const totalBytes = filesToUpload.reduce((sum, f) => sum + f.size, 0);
+      let bytesUploaded = 0;
+      const uploadedPhotoUrls: string[] = [];
+      let failCount = 0;
+
+      for (const file of filesToUpload) {
+        try {
+          const uploadTargetResponse = await fetch("/api/uploads/images", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              contentType: file.type,
+              fileName: file.name,
+            }),
+          });
+          if (!uploadTargetResponse.ok) {
+            failCount++;
+            bytesUploaded += file.size;
+            setUploadProgress(Math.round((bytesUploaded / totalBytes) * 100));
+            continue;
+          }
+
+          const { publicUrl, uploadUrl } = (await uploadTargetResponse.json()) as {
+            publicUrl: string;
+            uploadUrl: string;
+          };
+
+          const ok = await new Promise<boolean>((resolve) => {
+            const xhr = new XMLHttpRequest();
+            xhr.open("PUT", uploadUrl);
+            xhr.setRequestHeader("Content-Type", file.type || "image/jpeg");
+            xhr.upload.addEventListener("progress", (e) => {
+              if (!e.lengthComputable) return;
+              const current = bytesUploaded + e.loaded;
+              setUploadProgress(Math.round((current / totalBytes) * 100));
+            });
+            xhr.addEventListener("load", () => resolve(xhr.status >= 200 && xhr.status < 300));
+            xhr.addEventListener("error", () => resolve(false));
+            xhr.addEventListener("abort", () => resolve(false));
+            xhr.send(file);
+          });
+
+          bytesUploaded += file.size;
+          setUploadProgress(Math.round((bytesUploaded / totalBytes) * 100));
+
+          if (ok) {
+            uploadedPhotoUrls.push(publicUrl);
+          } else {
+            failCount++;
+          }
+        } catch {
+          failCount++;
+          bytesUploaded += file.size;
+          setUploadProgress(Math.round((bytesUploaded / totalBytes) * 100));
         }
       }
+
       setPhotos((prev) => [...prev, ...uploadedPhotoUrls]);
+      setUploadProgress(100);
+      if (failCount > 0) {
+        setUploadError(
+          `${failCount} av ${filesToUpload.length} bilder kunne ikke lastes opp. Prøv igjen.`,
+        );
+      }
       setUploading(false);
     },
-    [photos]
+    [photos],
   );
 
   if (step === "done") {
@@ -255,7 +297,11 @@ export default function NyPage() {
               accept="image/*"
               multiple
               className="hidden"
-              onChange={(e) => e.target.files && handlePhotoUpload(e.target.files)}
+              onChange={(e) => {
+                if (e.target.files) handlePhotoUpload(e.target.files);
+                e.target.value = "";
+              }}
+              disabled={uploading}
             />
             <svg className="mx-auto mb-3 text-[var(--color-stone)]" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
               <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12" />
@@ -264,19 +310,37 @@ export default function NyPage() {
               {uploading ? "Laster opp..." : "Klikk for å laste opp bilder"}
             </span>
           </label>
+          {uploading && (
+            <div className="space-y-1.5">
+              <div className="h-2 rounded-full bg-[var(--color-stone)]/15 overflow-hidden">
+                <div
+                  className="h-full rounded-full bg-[var(--color-ember)] transition-[width] duration-300 ease-out"
+                  style={{ width: `${uploadProgress}%` }}
+                />
+              </div>
+              <p className="font-mono text-xs text-[var(--color-stone)] text-right">
+                {uploadProgress}%
+              </p>
+            </div>
+          )}
+          {uploadError && (
+            <p className="font-body text-sm text-[var(--color-ember)]">
+              {uploadError}
+            </p>
+          )}
           {photos.length > 0 && (
             <div className="space-y-2">
               <p className="font-mono text-xs text-[var(--color-moss)]">
                 {photos.length} bilde{photos.length !== 1 ? "r" : ""} lastet opp
               </p>
-              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
+              <div className="grid grid-cols-3 gap-2">
                 {photos.map((imageUrl, i) => (
                   <div key={imageUrl} className="relative group aspect-square rounded-lg overflow-hidden border border-[var(--color-stone)]/15">
                     <StorageImage imageUrl={imageUrl} alt={`Bilde ${i + 1}`} className="rounded-lg" />
                     <button
                       type="button"
                       onClick={() => setPhotos((prev) => prev.filter((_, idx) => idx !== i))}
-                      className="absolute top-1 right-1 w-5 h-5 rounded-full bg-[var(--color-night)]/70 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                      className="absolute top-1 right-1 w-6 h-6 rounded-full bg-[var(--color-night)]/70 text-white flex items-center justify-center sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
                     >
                       <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M18 6L6 18M6 6l12 12" /></svg>
                     </button>
@@ -291,7 +355,7 @@ export default function NyPage() {
             </button>
             <button
               onClick={handleSubmit}
-              disabled={submitting}
+              disabled={submitting || uploading}
               className="px-6 py-3 rounded-lg bg-[var(--color-ember)] text-white font-body text-sm font-semibold hover:bg-[var(--color-ember-hover)] transition-colors disabled:opacity-50"
             >
               {submitting ? "Sender..." : "Send inn teltplass"}
