@@ -50,7 +50,7 @@ export default function Home() {
             className="font-body text-lg text-[var(--color-sand)]/80 mt-4 max-w-xl animate-fade-up"
             style={{ animationDelay: "100ms" }}
           >
-            Utforsk over 130 teltplasser, delt av friluftsfolk for friluftsfolk.
+            Utforsk over 130 teltplasser i hele Norge.
           </p>
           <div
             className="flex flex-wrap gap-3 mt-8 animate-fade-up"
