@@ -12,6 +12,48 @@ import { StorageImage } from "../../components/PlaceCard";
 
 mapboxgl.accessToken = MAPBOX_TOKEN;
 
+const MAX_IMAGE_DIMENSION = 2048;
+const JPEG_QUALITY = 0.8;
+
+function compressImage(file: File): Promise<File> {
+  return new Promise((resolve) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const { width, height } = img;
+      if (width <= MAX_IMAGE_DIMENSION && height <= MAX_IMAGE_DIMENSION && file.type === "image/jpeg") {
+        resolve(file);
+        return;
+      }
+
+      const scale = Math.min(MAX_IMAGE_DIMENSION / width, MAX_IMAGE_DIMENSION / height, 1);
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.round(width * scale);
+      canvas.height = Math.round(height * scale);
+      const ctx = canvas.getContext("2d")!;
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      canvas.toBlob(
+        (blob) => {
+          if (!blob) {
+            resolve(file);
+            return;
+          }
+          const baseName = file.name.replace(/\.[^.]+$/, "");
+          resolve(new File([blob], `${baseName}.jpg`, { type: "image/jpeg" }));
+        },
+        "image/jpeg",
+        JPEG_QUALITY,
+      );
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      resolve(file);
+    };
+    img.src = url;
+  });
+}
+
 type Step = "location" | "details" | "amenities" | "photos" | "done";
 
 export default function NyPage() {
@@ -74,12 +116,16 @@ export default function NyPage() {
       setUploadProgress(0);
 
       const filesToUpload = Array.from(files).slice(0, 12 - photos.length);
-      const totalBytes = filesToUpload.reduce((sum, f) => sum + f.size, 0);
+      const compressed: File[] = [];
+      for (const file of filesToUpload) {
+        compressed.push(await compressImage(file));
+      }
+      const totalBytes = compressed.reduce((sum, f) => sum + f.size, 0);
       let bytesUploaded = 0;
       const uploadedPhotoUrls: string[] = [];
       let failCount = 0;
 
-      for (const file of filesToUpload) {
+      for (const file of compressed) {
         try {
           const uploadTargetResponse = await fetch("/api/uploads/images", {
             method: "POST",
@@ -135,7 +181,7 @@ export default function NyPage() {
       setUploadProgress(100);
       if (failCount > 0) {
         setUploadError(
-          `${failCount} av ${filesToUpload.length} bilder kunne ikke lastes opp. Prøv igjen.`,
+          `${failCount} av ${compressed.length} bilder kunne ikke lastes opp. Prøv igjen.`,
         );
       }
       setUploading(false);
