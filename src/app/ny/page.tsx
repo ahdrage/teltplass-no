@@ -29,6 +29,15 @@ export default function NyPage() {
 
   const createSubmission = useMutation(api.submissions.create);
 
+  const handleLocationSelect = useCallback(
+    (newLat: number, newLng: number, addr: string) => {
+      setLat(newLat);
+      setLng(newLng);
+      setAddress(addr);
+    },
+    [],
+  );
+
   const handleSubmit = useCallback(async () => {
     if (!lat || !lng || !title.trim()) return;
     setSubmitting(true);
@@ -129,11 +138,7 @@ export default function NyPage() {
           lat={lat}
           lng={lng}
           address={address}
-          onSelect={(lat, lng, addr) => {
-            setLat(lat);
-            setLng(lng);
-            setAddress(addr);
-          }}
+          onSelect={handleLocationSelect}
           onNext={() => setStep("details")}
         />
       )}
@@ -315,6 +320,34 @@ function LocationStep({
   const [showSuggestions, setShowSuggestions] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
+  const [geoLoading, setGeoLoading] = useState(false);
+  const [geoError, setGeoError] = useState<string | null>(null);
+
+  const applyLocation = useCallback(
+    async (nextLat: number, nextLng: number) => {
+      const map = mapRef.current;
+      if (map) {
+        map.flyTo({ center: [nextLng, nextLat], zoom: 14 });
+        if (markerRef.current) markerRef.current.remove();
+        markerRef.current = new mapboxgl.Marker({ color: "#C8593A" })
+          .setLngLat([nextLng, nextLat])
+          .addTo(map);
+      }
+      let addr = `${nextLat.toFixed(6)}, ${nextLng.toFixed(6)}`;
+      try {
+        const res = await fetch(
+          `https://api.mapbox.com/geocoding/v5/mapbox.places/${nextLng},${nextLat}.json?access_token=${MAPBOX_TOKEN}&language=no`,
+        );
+        const data = await res.json();
+        if (data.features?.[0]) addr = data.features[0].place_name;
+      } catch {
+        /* keep coords as address */
+      }
+      setSearchQuery(addr);
+      onSelect(nextLat, nextLng, addr);
+    },
+    [onSelect],
+  );
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -342,27 +375,17 @@ function LocationStep({
         .addTo(map);
     }
 
-    map.on("click", async (e) => {
+    map.on("click", (e) => {
       const { lat: clickLat, lng: clickLng } = e.lngLat;
-      if (markerRef.current) markerRef.current.remove();
-      markerRef.current = new mapboxgl.Marker({ color: "#C8593A" })
-        .setLngLat([clickLng, clickLat])
-        .addTo(map);
-
-      let addr = `${clickLat.toFixed(6)}, ${clickLng.toFixed(6)}`;
-      try {
-        const res = await fetch(
-          `https://api.mapbox.com/geocoding/v5/mapbox.places/${clickLng},${clickLat}.json?access_token=${MAPBOX_TOKEN}&language=no`
-        );
-        const data = await res.json();
-        if (data.features?.[0]) addr = data.features[0].place_name;
-      } catch {}
-      onSelect(clickLat, clickLng, addr);
+      void applyLocation(clickLat, clickLng);
     });
 
     mapRef.current = map;
-    return () => { map.remove(); mapRef.current = null; };
-  }, []);
+    return () => {
+      map.remove();
+      mapRef.current = null;
+    };
+  }, [applyLocation]);
 
   const fetchSuggestions = useCallback(async (query: string) => {
     if (query.trim().length < 2) { setSuggestions([]); return; }
@@ -407,11 +430,66 @@ function LocationStep({
     } catch {}
   }, [searchQuery]);
 
+  const handleUseMyLocation = useCallback(() => {
+    setGeoError(null);
+    if (typeof navigator === "undefined" || !navigator.geolocation) {
+      setGeoError("Nettleseren støtter ikke posisjon.");
+      return;
+    }
+    setGeoLoading(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setGeoLoading(false);
+        void applyLocation(pos.coords.latitude, pos.coords.longitude);
+      },
+      (err) => {
+        setGeoLoading(false);
+        if (err.code === err.PERMISSION_DENIED) {
+          setGeoError(
+            "Posisjon ble avslått. Du kan fortsatt velge sted på kartet.",
+          );
+        } else if (err.code === err.POSITION_UNAVAILABLE) {
+          setGeoError("Kunne ikke finne posisjonen din.");
+        } else {
+          setGeoError("Kunne ikke hente posisjon. Prøv igjen.");
+        }
+      },
+      { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 },
+    );
+  }, [applyLocation]);
+
   return (
     <div className="space-y-4">
       <p className="font-body text-sm text-[var(--color-stone)]">
-        Klikk på kartet for å velge plassering
+        Klikk på kartet for å velge plassering, eller bruk din nåværende posisjon.
       </p>
+      <div className="flex flex-wrap items-center gap-2">
+        <button
+          type="button"
+          onClick={handleUseMyLocation}
+          disabled={geoLoading}
+          aria-busy={geoLoading}
+          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border border-[var(--color-stone)]/30 bg-[var(--color-cloud)] font-body text-sm font-medium text-[var(--color-bark)] hover:bg-[var(--color-sand)]/50 transition-colors disabled:opacity-60"
+        >
+          <svg
+            className="w-4 h-4 text-[var(--color-ember)] shrink-0"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            aria-hidden
+          >
+            <circle cx="12" cy="12" r="3" />
+            <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
+          </svg>
+          {geoLoading ? "Henter posisjon…" : "Bruk min posisjon"}
+        </button>
+        {geoError ? (
+          <p className="font-body text-sm text-[var(--color-ember)] w-full sm:w-auto">
+            {geoError}
+          </p>
+        ) : null}
+      </div>
       <div className="flex gap-2" ref={wrapperRef}>
         <div className="relative flex-1">
           <input
