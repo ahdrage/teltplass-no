@@ -103,6 +103,7 @@ export default function StederContent() {
                 imageUrl={place.photoMain ?? place.photos?.[0] ?? null}
                 distance={place.distance}
                 index={i}
+                linkSource="city"
               />
             ))}
           </div>

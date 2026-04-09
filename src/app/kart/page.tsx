@@ -1,11 +1,13 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
+import { trackEvent } from "fathom-client";
 import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { MAPBOX_TOKEN, AMENITY_CONFIG } from "../../lib/constants";
+import { FATHOM_EVENTS } from "@/lib/fathom-events";
 import Link from "next/link";
 
 mapboxgl.accessToken = MAPBOX_TOKEN;
@@ -146,6 +148,7 @@ export default function KartPage() {
   }, [mapLoaded, filteredPlaces]);
 
   const toggleFilter = useCallback((amenity: string) => {
+    trackEvent(FATHOM_EVENTS.TOGGLE_MAP_FILTER);
     setSelectedFilters((prev) =>
       prev.includes(amenity)
         ? prev.filter((f) => f !== amenity)

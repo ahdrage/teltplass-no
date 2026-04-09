@@ -1,8 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import { trackEvent } from "fathom-client";
 import { useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
+import { FATHOM_EVENTS } from "@/lib/fathom-events";
 import Link from "next/link";
 
 export function Footer() {
@@ -101,6 +103,7 @@ function NewsletterForm() {
     e.preventDefault();
     if (!email.trim()) return;
     await subscribe({ email });
+    trackEvent(FATHOM_EVENTS.NEWSLETTER_SIGNUP);
     setSubmitted(true);
     setEmail("");
   }

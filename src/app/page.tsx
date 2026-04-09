@@ -4,8 +4,10 @@ import Link from "next/link";
 import { useState } from "react";
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
+import { trackEvent } from "fathom-client";
 import { PlaceCard, StorageImage } from "../components/PlaceCard";
 import { dedupeCities, getVisibleItems } from "@/lib/homeData";
+import { FATHOM_EVENTS } from "@/lib/fathom-events";
 
 const INITIAL_FEATURED_COUNT = 4;
 const INITIAL_CITY_COUNT = 12;
@@ -91,6 +93,7 @@ export default function Home() {
                   imageUrl={place.photoMain ?? place.photos[0] ?? null}
                   index={i}
                   preload={i < 2}
+                  linkSource="home"
                 />
               ))}
             </div>
@@ -196,6 +199,7 @@ function CityCard({
     <Link
       href={`/steder/${city.slug}`}
       prefetch={false}
+      onClick={() => trackEvent(FATHOM_EVENTS.BROWSE_CITY)}
       className="group relative aspect-[3/4] rounded-xl overflow-hidden animate-fade-up"
       style={{ animationDelay: `${index * 60}ms` }}
     >

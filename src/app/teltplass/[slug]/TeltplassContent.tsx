@@ -163,6 +163,7 @@ export default function TeltplassContent() {
                 imageUrl={p.photoMain ?? p.photos?.[0] ?? null}
                 distance={p.distance}
                 index={i}
+                linkSource="nearby"
               />
             ))}
           </div>

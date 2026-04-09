@@ -1,10 +1,12 @@
 "use client";
 
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
+import { trackEvent } from "fathom-client";
 import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import Fuse from "fuse.js";
 import { PlaceCard } from "../../components/PlaceCard";
+import { FATHOM_EVENTS } from "@/lib/fathom-events";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { MAPBOX_TOKEN } from "../../lib/constants";
@@ -13,6 +15,7 @@ mapboxgl.accessToken = MAPBOX_TOKEN;
 
 export default function SokPage() {
   const [query, setQuery] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState("");
   const places = useQuery(api.places.list, { onlyApproved: true });
   const mapContainer = useRef<HTMLDivElement>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
@@ -35,6 +38,17 @@ export default function SokPage() {
     if (!query.trim() || !fuse) return places ?? [];
     return fuse.search(query).map((r) => r.item);
   }, [query, fuse, places]);
+
+  useEffect(() => {
+    const id = window.setTimeout(() => setDebouncedQuery(query), 450);
+    return () => window.clearTimeout(id);
+  }, [query]);
+
+  useEffect(() => {
+    const trimmed = debouncedQuery.trim();
+    if (trimmed.length < 2) return;
+    trackEvent(FATHOM_EVENTS.SEARCH_PLACES);
+  }, [debouncedQuery]);
 
   useEffect(() => {
     if (!mapContainer.current || mapRef.current) return;
@@ -128,6 +142,7 @@ export default function SokPage() {
               amenities={place.amenities}
               imageUrl={place.photoMain ?? place.photos?.[0] ?? null}
               index={i}
+              linkSource="search"
             />
           ))}
         </div>

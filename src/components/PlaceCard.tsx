@@ -3,7 +3,12 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { trackEvent } from "fathom-client";
 import { AMENITY_CONFIG } from "../lib/constants";
+import {
+  type PlaceLinkSource,
+  placeLinkEventForSource,
+} from "../lib/fathom-events";
 
 interface PlaceCardProps {
   title: string;
@@ -15,6 +20,8 @@ interface PlaceCardProps {
   index?: number;
   prefetch?: boolean;
   preload?: boolean;
+  /** When set, records a Fathom event for outbound navigation to the place. */
+  linkSource?: PlaceLinkSource;
 }
 
 export function PlaceCard({
@@ -27,11 +34,16 @@ export function PlaceCard({
   index = 0,
   prefetch = false,
   preload = false,
+  linkSource,
 }: PlaceCardProps) {
   return (
     <Link
       href={`/teltplass/${slug}`}
       prefetch={prefetch}
+      onClick={() => {
+        const eventName = placeLinkEventForSource(linkSource);
+        if (eventName) trackEvent(eventName);
+      }}
       className="group block bg-[var(--color-cloud)] rounded-xl border border-[var(--color-stone)]/15 overflow-hidden hover:-translate-y-1 hover:shadow-lg transition-all duration-200 animate-fade-up"
       style={{ animationDelay: `${index * 80}ms` }}
     >

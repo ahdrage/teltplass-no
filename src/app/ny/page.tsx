@@ -1,11 +1,13 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import { trackEvent } from "fathom-client";
 import { useMutation } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { MAPBOX_TOKEN, AMENITY_CONFIG } from "../../lib/constants";
+import { FATHOM_EVENTS } from "@/lib/fathom-events";
 import { StorageImage } from "../../components/PlaceCard";
 
 mapboxgl.accessToken = MAPBOX_TOKEN;
@@ -40,6 +42,7 @@ export default function NyPage() {
       photos,
       submitterEmail: email.trim() || undefined,
     });
+    trackEvent(FATHOM_EVENTS.SUBMIT_NEW_PLACE);
     setStep("done");
     setSubmitting(false);
   }, [lat, lng, title, description, address, amenities, photos, createSubmission]);

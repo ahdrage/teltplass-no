@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { ConvexClientProvider } from "../components/ConvexClientProvider";
+import { Fathom } from "../components/Fathom";
 import { Header } from "../components/Header";
 import { Footer } from "../components/Footer";
 import { ErrorBoundary } from "../components/ErrorBoundary";
@@ -54,6 +55,7 @@ export default function RootLayout({
         />
       </head>
       <body>
+        <Fathom />
         <ConvexClientProvider>
           <Header />
           <main className="min-h-screen">
