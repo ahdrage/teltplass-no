@@ -337,25 +337,47 @@ export default function NyPage() {
           <p className="font-body text-sm text-[var(--color-stone)]">
             Last opp bilder av teltplassen (valgfritt, maks 12)
           </p>
-          <label className="block border-2 border-dashed border-[var(--color-stone)]/30 rounded-xl p-8 text-center cursor-pointer hover:border-[var(--color-ember)] transition-colors">
-            <input
-              type="file"
-              accept="image/*"
-              multiple
-              className="hidden"
-              onChange={(e) => {
-                if (e.target.files) handlePhotoUpload(e.target.files);
-                e.target.value = "";
-              }}
-              disabled={uploading}
-            />
-            <svg className="mx-auto mb-3 text-[var(--color-stone)]" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12" />
-            </svg>
-            <span className="font-body text-sm text-[var(--color-stone)]">
-              {uploading ? "Laster opp..." : "Klikk for å laste opp bilder"}
-            </span>
-          </label>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <label className="flex-1 flex flex-col items-center border-2 border-dashed border-[var(--color-stone)]/30 rounded-xl p-6 text-center cursor-pointer hover:border-[var(--color-ember)] transition-colors">
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                className="hidden"
+                onChange={(e) => {
+                  if (e.target.files) handlePhotoUpload(e.target.files);
+                  e.target.value = "";
+                }}
+                disabled={uploading}
+              />
+              <svg className="mb-2 text-[var(--color-stone)]" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12" />
+              </svg>
+              <span className="font-body text-sm text-[var(--color-stone)]">
+                {uploading ? "Laster opp..." : "Velg fra galleri"}
+              </span>
+            </label>
+            <label className="flex-1 flex flex-col items-center border-2 border-dashed border-[var(--color-stone)]/30 rounded-xl p-6 text-center cursor-pointer hover:border-[var(--color-ember)] transition-colors">
+              <input
+                type="file"
+                accept="image/*"
+                capture="environment"
+                className="hidden"
+                onChange={(e) => {
+                  if (e.target.files) handlePhotoUpload(e.target.files);
+                  e.target.value = "";
+                }}
+                disabled={uploading}
+              />
+              <svg className="mb-2 text-[var(--color-stone)]" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z" />
+                <circle cx="12" cy="13" r="4" />
+              </svg>
+              <span className="font-body text-sm text-[var(--color-stone)]">
+                Ta bilde
+              </span>
+            </label>
+          </div>
           {uploading && (
             <div className="space-y-1.5">
               <div className="h-2 rounded-full bg-[var(--color-stone)]/15 overflow-hidden">
