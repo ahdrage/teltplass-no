@@ -25,7 +25,7 @@ export const metadata: Metadata = {
     url: siteUrl,
     images: [
       {
-        url: `${siteUrl}/teltplass.webp`,
+        url: `${siteUrl}/og-image.jpg`,
         width: 1200,
         height: 630,
         alt: "Teltplass.no - Finn teltplasser i hele Norge",
@@ -37,7 +37,7 @@ export const metadata: Metadata = {
     title: "Teltplass.no - Finn teltplasser i hele Norge",
     description:
       "Teltplass gir deg oversikten over de beste teltplassene i Norge. Vet du om en perle? Legg den gjerne inn!",
-    images: [`${siteUrl}/teltplass.webp`],
+    images: [`${siteUrl}/og-image.jpg`],
   },
 };
 
