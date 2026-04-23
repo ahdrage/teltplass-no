@@ -246,7 +246,7 @@ export default function KartPage() {
 
   return (
     <div className="flex flex-col lg:flex-row h-[calc(100vh-64px)]">
-      <div className="lg:w-[420px] flex-shrink-0 overflow-y-auto border-r border-[var(--color-stone)]/15 bg-[var(--color-sand)]">
+      <div className="order-2 lg:order-1 lg:w-[420px] flex-shrink-0 overflow-y-auto border-r border-[var(--color-stone)]/15 bg-[var(--color-sand)]">
         <div className="sticky top-0 z-10 bg-[var(--color-sand)] border-b border-[var(--color-stone)]/15 p-4 space-y-3">
           <Link
             href="/sok"
@@ -326,7 +326,7 @@ export default function KartPage() {
         </div>
       </div>
 
-      <div className="relative flex-1 min-h-[360px] lg:min-h-0 map-fullscreen">
+      <div className="order-1 lg:order-2 relative flex-1 min-h-[360px] lg:min-h-0 map-fullscreen">
         <div ref={mapContainer} className="h-full w-full" />
 
         <div className="absolute bottom-6 left-4 z-10">
