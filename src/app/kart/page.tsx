@@ -158,7 +158,7 @@ export default function KartPage() {
 
   return (
     <div className="relative h-[calc(100vh-64px)] map-fullscreen">
-      <div ref={mapContainer} className="absolute inset-0" />
+      <div ref={mapContainer} className="h-full w-full" />
 
       {/* Filter bar */}
       <div className="absolute top-4 left-4 right-4 z-10 flex flex-wrap gap-2 pointer-events-none">

@@ -26,7 +26,15 @@ export function normalizeImageUrl(url: string | undefined): string | undefined {
     return `https:${trimmedUrl}`;
   }
 
-  return trimmedUrl;
+  if (trimmedUrl.startsWith("/")) {
+    return trimmedUrl;
+  }
+
+  if (/^https?:\/\//i.test(trimmedUrl)) {
+    return trimmedUrl;
+  }
+
+  return undefined;
 }
 
 export function buildCityImageSourceBySlug(

@@ -14,6 +14,19 @@ test("normalizeImageUrl adds https to protocol-relative urls", () => {
   );
 });
 
+test("normalizeImageUrl keeps absolute and root-relative urls", () => {
+  assert.equal(
+    normalizeImageUrl("https://s3.amazonaws.com/example/image.jpg"),
+    "https://s3.amazonaws.com/example/image.jpg",
+  );
+  assert.equal(normalizeImageUrl("/teltplass.webp"), "/teltplass.webp");
+});
+
+test("normalizeImageUrl rejects invalid image paths", () => {
+  assert.equal(normalizeImageUrl("img-1"), undefined);
+  assert.equal(normalizeImageUrl("example.com/image.jpg"), undefined);
+});
+
 test("buildCityImageSourceBySlug maps city images by slug", () => {
   const sources = buildCityImageSourceBySlug([
     {

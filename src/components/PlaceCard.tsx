@@ -9,6 +9,7 @@ import {
   type PlaceLinkSource,
   placeLinkEventForSource,
 } from "../lib/fathom-events";
+import { normalizeImageUrl } from "@/lib/imageSourceData";
 
 interface PlaceCardProps {
   title: string;
@@ -99,13 +100,14 @@ export function StorageImage({
   sizes?: string;
 }) {
   const [failed, setFailed] = useState(false);
-  if (!imageUrl) {
+  const normalizedImageUrl = normalizeImageUrl(imageUrl ?? undefined);
+  if (!normalizedImageUrl) {
     return <div className={`w-full h-full bg-[var(--color-sand)] animate-pulse ${className}`} />;
   }
   if (failed) return <PlaceholderImage />;
   return (
     <Image
-      src={imageUrl}
+      src={normalizedImageUrl}
       alt={alt}
       fill
       sizes={sizes}
